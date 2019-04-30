@@ -111,13 +111,13 @@ void init(void)
     sealevel = -0.01;
     polysize = 0.01;
 }
-//Simply calls the general gl reshaping functions, making sure things remain as they should
+
 void reshape (int w, int h)
 {
     glViewport (0, 0, (GLsizei) w, (GLsizei) h);
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
-    gluPerspective(75.0,(double)w / (double)h,0.0001,10.0);
+    gluPerspective(80.0,(double)w / (double)h,0.0001,10.0);
     glMatrixMode (GL_MODELVIEW);
 }
 
@@ -135,8 +135,6 @@ public:
         y = secDim;
         z = thirdDim;
     }
-    
-    //A very basic function to add two vectors together, and return the result
     Vect operator+(Vect temp)
     {
         double xNew = x + temp.x;
@@ -216,8 +214,6 @@ public:
         
         return newVect;
     }
-    
-    //Normalize the vectors in the interest of safe rotations
     void normalizeCompVect()
     {
         double newW = w*w;
@@ -251,10 +247,6 @@ public:
     }
 };
 
-/*
- * Plane class is used for tracking locations and directions
- * without rotations systems problems kicking in (hopefully, wrote this descriprion early in the process)
- */
 class Plane
 {
 public:
@@ -332,8 +324,6 @@ void updateVectors() {
     planeArr[2] = vect.y;
 }
 
-// lighting of the map
-
 void setUpLights(void)
 {
     glEnable(GL_LIGHTING);
@@ -347,8 +337,6 @@ void setUpLights(void)
     glLightfv(GL_LIGHT0, GL_DIFFUSE, white);
     glLightfv(GL_LIGHT0, GL_SPECULAR, white);
 }
-
-//It sets the position of the function to look at the position of the Plane object, then calls lights
 
 void display(void)
 {
@@ -364,8 +352,9 @@ void display(void)
     GLfloat seadiff[] = {0.2,0.6,0.8,1.0};
     GLfloat seaspec[] = {0.5,0.7,1.0,1.0};
     
-    GLfloat paraamb[] = {0.4,0.4,0.3,1.0};
-    GLfloat paradiff[] = {0.3,0.3,0.4,1.0};
+    GLfloat paraamb[] = {0.4,0.9,0.3,1.0};
+    GLfloat paradiff[] = {0.3,0.7,0.4,1.0};
+    GLfloat paraspec[] = {0.8,0.7,1.0,1.0};
     
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f (1.0, 1.0, 1.0);
@@ -392,36 +381,40 @@ void display(void)
     glVertex3f(0.0,1.0,sealevel);
     glEnd();
     
-    glLoadIdentity();                  // Reset the model-view matrix
-    glTranslatef(0.0f, 0.0f, -3.0f);
+    glClear (GL_DEPTH_BUFFER_BIT);
+    
+    glLoadIdentity();
+    glTranslatef(0.0f, 0.5f, -3.0f);
     glRotatef(90, 1, 0, 0);
     glScalef(0.2,0.2,0.2);
-    setUpLights();
     
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, paraamb);
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, paradiff);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, paradiff);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, paraspec);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 10.0);
     
-    glNormal3f(0.0,1.0,0.0);
-    glBegin(GL_TRIANGLES);           // Begin drawing the paraglide with 4 triangles
+    glShadeModel(GL_SMOOTH);
+    glColor3f (0.6, 0.9, 0.8);
+    
+    glBegin(GL_TRIANGLES);
     // Front
     glVertex3f( 0.0f, 1.0f, 0.0f);
-    glVertex3f(-1.5f, -1.0f, 0.3f);
-    glVertex3f(1.5f, -1.0f, 0.3f);
+    glVertex3f(-3.5f, -1.0f, 0.2f);
+    glVertex3f(3.5f, -1.0f, 0.2f);
     // Right
     glVertex3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(1.5f, -1.0f, 0.3f);
-    glVertex3f(1.5f, -1.0f, -0.3f);
+    glVertex3f(3.5f, -1.0f, 0.2f);
+    glVertex3f(3.5f, -1.0f, -0.2f);
     // Back
     glVertex3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(1.5f, -1.0f, -0.3f);
-    glVertex3f(-1.5f, -1.0f, -0.3f);
+    glVertex3f(3.5f, -1.0f, -0.2f);
+    glVertex3f(-3.5f, -1.0f, -0.2f);
     // Left
     glVertex3f( 0.0f, 1.0f, 0.0f);
-    glVertex3f(-1.5f,-1.0f,-0.3f);
-    glVertex3f(-1.5f,-1.0f, 0.3f);
-    glEnd();   // Done drawing the paraglide
+    glVertex3f(-3.5f,-1.0f,-0.2f);
+    glVertex3f(-3.5f,-1.0f, 0.2f);
+    glEnd();
+   
     
     glutSwapBuffers();
     glFlush ();
@@ -440,8 +433,6 @@ void keyInputHandler(int key, int x, int y)
 
 void keyboard(unsigned char key, int x, int y)
 {
-    //below is the given key inputs
-    
     if(key == '-') { sealevel -= 0.01; }
     else if(key == '=') { sealevel += 0.01; }
     else if(key == 'f') { polysize /= 2.0; }
